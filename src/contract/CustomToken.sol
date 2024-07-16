@@ -53,6 +53,7 @@ contract CustomToken {
     }
 
     function mint(address _to, uint256 _value) external {
+        
         require(msg.sender == address(0), "ERC20: only the contract owner can mint tokens");
         _transfer(address(0), _to, _value);
     }

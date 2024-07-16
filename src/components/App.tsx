@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { ethers } from 'ethers'
 import customTokenAbi from '../contract/CustomToken.json'
 
-const contractAddress = '0xf6B9c31a9Ab2049A23aaf4f984cF5e337f7A8EA7'; // Update with your deployed contract address
+const contractAddress = '0xFABB0ac9d68B0B445fB7357272Ff202C5651694a'; // Update with your deployed contract address
 const abi = customTokenAbi.abi;
 
 function App() {
@@ -50,12 +50,12 @@ function App() {
   const mintTokens = async () => {
     try {
       const { ethereum } = window
-
+  
       if (!ethereum) {
         console.log('Ethereum object does not exist')
         return
       }
-
+  
       const provider = new ethers.providers.Web3Provider(ethereum)
       const signer = provider.getSigner()
       const customTokenContract = new ethers.Contract(
@@ -63,15 +63,20 @@ function App() {
         abi,
         signer
       )
-
+  
       console.log('Minting tokens')
       const tx = await customTokenContract.mint(currentAccount, ethers.utils.parseEther('100'))
       await tx.wait()
       console.log('Tokens minted successfully!')
+  
+      // Update balance after minting
+      const updatedBalance = await customTokenContract.balanceOf(currentAccount)
+      setBalance(updatedBalance.toString())
     } catch (err) {
       console.log(err)
     }
   }
+  
 
   const transferTokens = async () => {
     try {
@@ -89,11 +94,16 @@ function App() {
         abi,
         signer
       )
+     
+      console.log('Transferring tokens');
+      console.log('To:', transferTo);
+      console.log('Amount:', ethers.utils.parseEther(transferAmount.toString()));
+      
+      const tx = await customTokenContract.transfer(transferTo, ethers.utils.parseEther(transferAmount.toString()));
+      await tx.wait();
+      console.log(transferAmount.toString());
+      console.log('Tokens transferred successfully!');
 
-      console.log('Transferring tokens')
-      const tx = await customTokenContract.transfer(transferTo, ethers.utils.parseEther(transferAmount.toString()))
-      await tx.wait()
-      console.log('Tokens transferred successfully!')
     } catch (err) {
       console.log(err)
     }
@@ -127,7 +137,9 @@ function App() {
                   type="number"
                   placeholder="Amount"
                   value={transferAmount}
-                  onChange={(e) => setTransferAmount(Number(e.target.value))}
+                  onChange={(e) => setTransferAmount(Number(e.target.value))
+                    
+                  }
                   className="rounded-r-none border-2 border-solid border-gray-300 py-1 px-2 h-10"
                 />
                 <button onClick={transferTokens} className="btn-primary rounded-l-none w-40 bg-pink-400 hover:bg-pink-400">Transfer</button>
